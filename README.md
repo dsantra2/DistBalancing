@@ -3,9 +3,9 @@ This supplementary file contains replication codes for "Distributional Balancing
 ## Software and Packages
 * Software: R version 4.4.3
 * Packages: _optiSolve_ (version 1.0); _WeightIt_ (version 1.4.0); _DoubleML_ (version 1.0.2); _mlr3_ (version 1.0.1); _mlr3learners_ (version 0.12.0); _data.table_ (version 1.17.0); _ggplot2_ (version 3.5.2); _purrr_ (version 1.0.4); _dplyr_ (version 1.1.4); _tidyr_ (version 1.3.1)
-## Simulation Folder
+# Simulation Folder
 The Simulation folder contains replication files for the simulation studies presented in Section 6 of the main paper.
-### Simulation Setup
+## Simulation Setup
 For the simulations, we have considered:
 
 * **Dimension of the data:** $p=10$. $X_i \sim [N(0,1)]^{10}$ for all $i \in \{1, 2, \dots, N\}$.
@@ -39,13 +39,101 @@ $$
 * **Regularization parameter:** $\lambda = \frac{1}{N^2}$.
 * **Sample size:** $N = 100, 200, 400, 800, 1600$.
 * **Repetition:** For each $N$, number of estimands calculated = 500.
-### Codes
-* **Simulation_Final.R** generates a single row as output and produce a csv file with a name structure : "_Result_optiSolve_%s_DGP%0.5d_N%0.5d_%s_SEED%0.5d.csv_".
-* **Simulation_Report.R** generates the summary table using the combined result from the previous one.
+## Codes
+### Simulation_Final.R
+#### 1. Setup and Hyperparameters
+* The script is designed to run in a batch environment (e.g., HTCondor or SLURM).
 
-## DataAnalysis Folder
+* **Batch Processing:** Reads `commandArgs` to set the `BATCH` index, which selects a row from the hyperparameter grid.
+* **Hyperparameter Grid:** A full factorial design covering:
+    * **Kernels:** `Gaussian`, `Laplacian`, `Energy`, `Matern`, `TCFD` (t-5), `IPW`, `CBPS`.
+    * **DGP Types:** `1` (Linear IV), `2` (Non-linear IV).
+    * **Sample Size ($N$):** 100, 200, 400, 800, 1600.
+    * **Inference:** `SS` (Subsampling) or `Boot` (Bootstrap).
+    * **Seeds:** 1 to 550.
+
+#### 2. Kernel Definitions
+Functions to compute the Gram matrix for various kernels.
+
+* **`K.T.CFD(Xmat, bandwidth)`**: Implements the **TCFD Kernel** approximation. It approximates the kernel by projecting data with random weights drawn from a t-distribution ($df=5$) and computing the cosine distance.
+* **`Ker(Xmat, name, ...)`**: The main wrapper for kernel calculations.
+    * **Logic:** Computes distance matrices (Euclidean or Manhattan) and applies the kernel formula (e.g., Gaussian $\exp(-D^2/\gamma^2)$).
+    * **Bandwidth Selection:** Uses the **median heuristic** (median of pairwise distances) if no bandwidth is provided.
+
+#### 3. Data Generation
+* **`DGP(DGP.type, N, p)`**: Generates synthetic datasets ($X, Z, A, Y$).
+    * **Covariates ($X$):** Standard normal noise ($p=10$).
+    * **Instrument ($Z$):** Generated via a logistic model. `DGP.type=1` uses a linear combination of $X$; `DGP.type=2` uses a non-linear transformation.
+    * **Treatment ($A$):** Determined by latent variables $L_0, L_1$ to ensure the monotonicity assumption (defining Compliers, Always-takers, Never-takers).
+    * **Outcome ($Y$):** A function of treatment and covariates with added noise.
+    * **True LATE:** Calculates the theoretical true LATE for benchmarking.
+
+#### 4. Distribution Balancing (Optimization)
+* **`distbalance(treatment, covariate, name, bandwidth, lambda)`**: The core optimization routine.
+    * **Goal:** Find weights that minimize the Maximum Mean Discrepancy (MMD) between treatment groups while satisfying constraints (weights sum to sample sizes).
+    * **Method:** Solves a Quadratic Programming (QP) problem using the `optiSolve` package.
+    * **Regularization:** Adds a ridge term $\lambda = 1/N^2$ to the diagonal of the $Q$ matrix for stability.
+
+#### 5. Point Estimation
+* **`sim(DGP.type, N, ...)`**: Orchestrates a single simulation run.
+    * **Kernel Methods:** Calls `distbalance` to get optimal weights, then calculates the Wald estimator using weighted means.
+    * **IPW / CBPS:** Fits a logistic regression or uses `WeightIt::weightit` (CBPS) to estimate propensity scores, then calculates the standard Inverse Probability Weighted estimator.
+
+#### 6. Inference Methods
+Two methods are implemented to construct Confidence Intervals (CIs).
+
+* **`choose_best_m_ss(...)` (Subsampling):** Used primarily for kernel methods.
+    * **Adaptive Subsampling:** Instead of fixing the subsample size $m$, it searches a grid of 20 values between $\sqrt{N}$ and $3\sqrt{N}$.
+    * **Volatility Index (VI):** Selects the optimal $m$ by minimizing the volatility (standard deviation) of the resulting confidence intervals.
+* **`run_boot(...)` (Bootstrap):** Standard non-parametric bootstrap.
+    * Resamples the dataset with replacement $N$ times.
+    * Re-estimates parameters (including re-fitting propensity scores for IPW/CBPS) to generate empirical distribution CIs.
+
+#### 7. Execution and Output
+* **`run_all(...)`**: The main driver function.
+    1.  Generates data.
+    2.  Computes the point estimate.
+    3.  Runs the selected inference method (Subsampling or Bootstrap).
+    4.  Returns a consolidated list of results (Point Estimate, Lower CI, Upper CI, Best $m$).
+* **Output:** The script writes a `.csv` file named dynamically based on the parameters (e.g., `Result_optiSolve_Gaussian_DGP00001_N00100_SS_SEED00001.csv`).
+  
+### Simulation_Report.R generates the summary table using the combined result from the previous one.
+This R script processes the raw simulation output (`Result_merge.csv`) to compute performance metrics (Bias, MSE, Coverage, etc.) for the LATE estimators. 
+
+#### 1. True Value Definitions
+Hardcoded "True" values derived from the Data Generating Process (DGP) are defined for benchmarking.
+* **Linear DGP (Type 1):** `Denom_Linear`, `Numer_Linear`, `LATE_Linear`.
+* **Non-Linear DGP (Type 2):** `Denom_nonLinear`, `Numer_nonLinear`, `LATE_nonLinear`.
+
+#### 2. Data Cleaning & Consistency Checks
+The script ensures data integrity before analysis:
+* **Mismatch Filtering:** Checks that point estimates (`num`, `denom`, `late`) are identical for both inference methods (`SS` and `Boot`) within the same Seed/N/Kernel. If the point estimates differ by more than $10^{-6}$, those seeds are discarded.
+* **Deduplication:** Rounds values to 7 decimal places and removes duplicate rows.
+* **Trimming:** Retains the first 500 valid repetitions per group.
+
+#### 3. Confidence Interval Rescaling (Subsampling)
+Confidence intervals from subsampling must be rescaled to account for the difference between the subsample size ($m$) and the full sample size ($N$).
+* **Transformation:**
+    $$\text{CI}_{\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times (\text{Limit}_{\text{sub}} - \text{PointEst})$$
+* This converts the width of the interval from the subsample scale to the proper $\sqrt{N}$ scale required for inference on the full dataset.
+
+#### 4. Performance Metrics Calculation
+The script aggregates results by `kernel`, `N`, and `Inference` type to calculate the following metrics for the **Numerator**, **Denominator**, and **LATE** separately for each DGP type:
+
+* **Bias:** Scaled bias ($100 \times \text{mean}(\hat{\theta} - \theta_{\text{true}})$).
+* **SE (Standard Error):** Scaled standard deviation of the estimates ($100 \times \text{SD}(\hat{\theta})$).
+* **MSE (Mean Squared Error):** $\text{Bias}^2 + \text{SE}^2$.
+* **Coverage:** The proportion of simulations where the True value falls within the calculated Confidence Interval.
+* **Length:** The average width of the Confidence Interval.
+
+#### 5. Output Dataframes
+Six summary dataframes are created:
+* **DGP 1 (Linear):** `num1`, `denom1`, `late1`
+* **DGP 2 (Non-Linear):** `num2`, `denom2`, `late2`
+
+# DataAnalysis Folder
 The DataAnalysis folder contains replication files for the real-data analysis in Section 7 of the main paper. 
-### Description
+## Description
 The data set is taken from the R package _DoubleML_ and can be used to estimate the effect of 401(k) eligibility and participation on accumulated assets [DoubleML2022Python](http://jmlr.org/papers/v23/21-0862.html).In this data,
 
 * **Number of observations (N)** = 9915
