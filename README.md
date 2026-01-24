@@ -97,7 +97,7 @@ Two methods are implemented to construct Confidence Intervals (CIs).
     4.  Returns a consolidated list of results (Point Estimate, Lower CI, Upper CI, Best $m$).
 * **Output:** The script writes a `.csv` file named dynamically based on the parameters (e.g., `Result_optiSolve_Gaussian_DGP00001_N00100_SS_SEED00001.csv`).
   
-### Simulation_Report.R generates the summary table using the combined result from the previous one.
+### Simulation_Report.R: generates the summary table using the combined result from the previous one.
 This R script processes the raw simulation output (`Result_merge.csv`) to compute performance metrics (Bias, MSE, Coverage, etc.) for the LATE estimators. 
 
 #### 1. True Value Definitions
@@ -180,7 +180,8 @@ $$
 * **Inverse probability weighting (IPW):** The propensity scores are calculated using the logistic regression model with no interaction terms, and the weights are calculated as the inverse propensity score.
 
 * **Double debiased machine learning (DDML):** See Chernozhukov (2018)[^7].
-### Codes
+## Codes
+The functions used in the following R files are similar to the previous section (simulation).
 * **weights_Final.R** calculates the optimal weights for different kernels.
 * **401k_Final.R** generates a single row as output and produce a csv file with a name structure : "_Result_401k_%s_N%05d_%s_SEED%05d.csv_".
 * **401k_Report.R** generates the summary table using the combined result from _401k_Final_ and weights from _weights_Final.R_.
