@@ -11,8 +11,8 @@ For the simulations, we have considered:
 * **Dimension of the data:** $p=10$. $X_i \sim [N(0,1)]^{10}$ for all $i \in \{1, 2, \dots, N\}$.
 * **Unobserved confounder:** $U \sim N(0,1)$.
 * **Instrumental variable ($Z$):**
-  * **Linear:** $Z_i \sim \text{Bernoulli}(\text{expit}(X_i \cdot \mathbf{v}))$, where $\mathbf{v}$ is a vector $0.15\mathbf{1}$ and $\text{expit}(x) = \frac{e^x}{1+e^x}$.
-  * **Non-Linear:** $Z_i \sim \text{Bernoulli}\left(\text{expit}\left(\frac{1}{4}|X_i|_{[1:5]} + \frac{1}{4}X_i_{[6:10]} - 2.25\right)\right)$.
+  * **Linear:** $Z_i \sim \text{Bernoulli}(\text{expit}(X_i \cdot \mathbf{v}))$, where $\mathbf{v}$ is a vector $0.15 \cdot \mathbf{1}_{10}$ and $\text{expit}(x) = \frac{e^x}{1+e^x}$.
+  * **Non-Linear:** $Z_i \sim \text{Bernoulli} \left(\text{expit} \left(\frac{1}{4} |X_i|[1:5] + \frac{1}{4} X_i[6:10] - 2.25 \right)\right)$.
 * **Treatment indicators ($A(0), A(1), A$):** The coefficients ($\gamma_0, \gamma_1$, and $\pm 0.5$) are chosen such that the monotonicity assumption (i.e., no defier) is satisfied.
   * $L_0 = \gamma_0 + X_i \cdot \gamma_x - 0.5 \cdot |U_i|$
   * $L_1 = \gamma_0 + X_i \cdot \gamma_x + 0.5 \cdot |U_i|$
@@ -28,9 +28,9 @@ For the simulations, we have considered:
   * Denominator: $E[A^{(z=1)} - A^{(z=0)}] = E_X [ E[A|Z=1, X] - E[A|Z=0, X] ]$
   * Numerator: $E[Y^{(z=1)} - Y^{(z=0)}] = E_X [ E[Y|Z=1, X] - E[Y|Z=0, X] ]$
   * LATE: $E[Y(Z=1) - Y(Z=0) \mid A(Z=1) > A(Z=0)]$
-* **Kernels:** Gaussian, Laplacian, Energy, and TCFD, compared with IPW and CBPS.
+* **Kernels:** Gaussian, Laplacian, TCFD, Mat\'ern and Energy.
 
-The bandwidth parameters of Gaussian and Laplacian were chosen from the median heuristics [@garreau2018largesampleanalysismedian]. In addition, for TCFD, the kernel is approximated by using i.i.d. $V_1, \dots, V_T$ drawn from a $t(5)$ distribution using the following equation with $T=10^4$:
+The bandwidth parameters of Gaussian and Laplacian were chosen from the median heuristics [Garreau, D., Jitkrittum, W., & Kanagawa, M. (2018)](https://arxiv.org/abs/1707.07269). In addition, for TCFD, the kernel is approximated by using i.i.d. $V_1, \dots, V_T$ drawn from a $t(5)$ distribution using the following equation with $T=10^4$:
 
 $$
 \tilde{k}(X_i, X_j) \simeq \frac{1}{T} \sum_{t=1}^T \cos \{ V_t'(X_i - X_j) \}
