@@ -15,3 +15,7 @@ The DataAnalysis folder contains replication files for the real-data analysis in
 * **Treatment (A)** = Participation to 401k (`p401` ∈ {0,1})
 * **Instrumental variable (Z)** = Eligibility for 401k plan (`e401` ∈ {0,1}) [3682 are eligible]
 ### Codes
+
+## References
+* Santra, Chen, Park (2026). **Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance**, arXiv [link](https://doi.org/10.48550/arXiv.2601.15449).
+* Bach, P., Chernozhukov, V., Kurz, M. S., & Spindler, M. (2022). DoubleML – An object-oriented implementation of double machine learning in Python. Journal of Machine Learning Research, 23 (53), 1–6. [link](http://jmlr.org/papers/v23/21-0862.html).
