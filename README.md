@@ -11,7 +11,7 @@ For the simulations, we have considered:
 * **Dimension of the data:** $p=10$. $X_i \sim [N(0,1)]^{10}$ for all $i \in \{1, 2, \dots, N\}$.
 * **Unobserved confounder:** $U \sim N(0,1)$.
 * **Instrumental variable ($Z$):**
-  * **Linear:** $Z_i \sim \text{Bernoulli}(\text{expit}(X_i \cdot \mathbf{v}))$, where $\mathbf{v}$ is a vector $(0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15)$ and $\text{expit}(x) = \frac{e^x}{1+e^x}$.
+  * **Linear:** $Z_i \sim \text{Bernoulli}(\text{expit}(X_i \cdot \mathbf{v}))$, where $\mathbf{v}$ is a vector $0.15\mathbf{1}$ and $\text{expit}(x) = \frac{e^x}{1+e^x}$.
   * **Non-Linear:** $Z_i \sim \text{Bernoulli}\left(\text{expit}\left(\frac{1}{4}|X_i|_{[1:5]} + \frac{1}{4}X_i_{[6:10]} - 2.25\right)\right)$.
 * **Treatment indicators ($A(0), A(1), A$):** The coefficients ($\gamma_0, \gamma_1$, and $\pm 0.5$) are chosen such that the monotonicity assumption (i.e., no defier) is satisfied.
   * $L_0 = \gamma_0 + X_i \cdot \gamma_x - 0.5 \cdot |U_i|$
