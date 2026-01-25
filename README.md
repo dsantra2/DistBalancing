@@ -168,11 +168,7 @@ $$
 * **Distribution balancing:** Gaussian, Laplacian, Matern, Energy, and TCFD kernels are used to construct the gram matrix.
     * The bandwidth parameters of Gaussian, Laplacian, and Matern were chosen from the median heuristics[^3].
     * For TCFD, the kernel is approximated by using i.i.d. $V_1, \ldots, V_T$ drawn from a $t(5)/\sigma$ distribution using the following equation with $T=10^4$:
-    
-    $$
-    \tilde{k}(X _ i,X _ j) \simeq \frac{1}{T}\sum _ {t=1}^T \cos{ \{ V_ t'(X_ i-X_ j) \}}
-    $$
-    
+    $$\tilde{k}(X _ i,X _ j) \simeq \frac{1}{T}\sum _ {t=1}^T \cos{ \{ V_ t'(X_ i-X_ j) \}}$$
     where $\sigma =$ median[Laplacian kernel].
 
 * **Covariate balancing propensity score (CBPS):** The propensity scores are calculated using the `WeightIt` package, and the weights are calculated as the inverse propensity score. This method was proposed in Imai (2014)[^8]. R package descriptions are given in Greifer (2020)[^9].
@@ -181,9 +177,9 @@ $$
 
 * **Double debiased machine learning (DDML):** See Chernozhukov (2018)[^10].
 ## Codes
-The functions used in the following R files are similar to the previous section (simulation).
+The functions used in the following R files are similar to the previous section (Simulation).
 * **weights_Final.R** calculates the optimal weights for different kernels.
-* **401k_Final.R** generates a single row as output and produce a csv file with a name structure : "_Result_401k_%s_N%05d_%s_SEED%05d.csv_".
+* **401k_Final.R** generates a single row as output and produce a csv file with a name structure: "_Result_401k_%s_N%05d_%s_SEED%05d.csv_".
 * **401k_Report.R** generates the summary table using the combined result from _401k_Final_ and weights from _weights_Final.R_.
 
 ## References
