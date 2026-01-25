@@ -57,7 +57,7 @@ Functions to compute the Gram matrix for various kernels.
 
 * **`K.T.CFD(Xmat, bandwidth)`**: Implements the **TCFD Kernel** approximation. It approximates the kernel by projecting data with random weights drawn from a t-distribution ($df=5$) and computing the cosine distance.
 * **`Ker(Xmat, name, ...)`**: The main wrapper for kernel calculations.
-    * **Logic:** Computes distance matrices (Euclidean or Manhattan) and applies the kernel formula (e.g., Gaussian $\exp(-D^2/\gamma^2)$).
+    * **Logic:** Computes distance matrices (Euclidean or Manhattan) and applies the kernel formula (e.g., Gaussian $\exp{(-D^2/\gamma^2)}$).
     * **Bandwidth Selection:** Uses the **median heuristic** (median of pairwise distances)[^3] if no bandwidth is provided.
 
 #### 3. Data Generation
@@ -70,7 +70,7 @@ Functions to compute the Gram matrix for various kernels.
 
 #### 4. Distribution Balancing (Optimization)
 * **`distbalance(treatment, covariate, name, bandwidth, lambda)`**: The core optimization routine.
-    * **Goal:** Find weights that minimize the Maximum Mean Discrepancy (MMD) between treatment groups while satisfying constraints (weights sum to sample sizes).
+    * **Goal:** Find weights that minimize the Characteristic Function Distance (CFD) between treatment groups while satisfying constraints (weights sum to sample sizes).
     * **Method:** Solves a Quadratic Programming (QP) problem using the `optiSolve` package.
     * **Regularization:** Adds a ridge term $\lambda = 1/N^2$ to the diagonal of the $Q$ matrix for stability.
 
@@ -84,7 +84,7 @@ Two methods are implemented to construct Confidence Intervals (CIs).
 
 * **`choose_best_m_ss(...)` (Subsampling):** Used primarily for kernel methods.
     * **Adaptive Subsampling:** Instead of fixing the subsample size $m$, it searches a grid of 20 values between $\sqrt{N}$ and $3\sqrt{N}$.
-    * **Volatility Index (VI):** Selects the optimal $m$ by minimizing the volatility (standard deviation) of the resulting confidence intervals.
+    * **Volatility Index (VI):** Selects the optimal $m$ by minimizing the volatility (standard deviation)[^6] of the resulting confidence intervals.
 * **`run_boot(...)` (Bootstrap):** Standard non-parametric bootstrap.
     * Resamples the dataset with replacement $N$ times.
     * Re-estimates parameters (including re-fitting propensity scores for IPW/CBPS) to generate empirical distribution CIs.
@@ -114,7 +114,7 @@ The script ensures data integrity before analysis:
 #### 3. Confidence Interval Rescaling (Subsampling)
 Confidence intervals from subsampling must be rescaled to account for the difference between the subsample size ($m$) and the full sample size ($N$).
 * **Transformation:**
-    $$\text{CI}_{\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times (\text{Limit}_{\text{sub}} - \text{PointEst})$$
+    $$\text{CI}_{\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times \{\text{Limit}_{\text{sub}} - \text{PointEst}\}$$
 * This converts the width of the interval from the subsample scale to the proper $\sqrt{N}$ scale required for inference on the full dataset.
 
 #### 4. Performance Metrics Calculation
