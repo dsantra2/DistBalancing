@@ -114,7 +114,7 @@ The script ensures data integrity before analysis:
 #### 3. Confidence Interval Rescaling (Subsampling)
 Confidence intervals from subsampling must be rescaled to account for the difference between the subsample size ($m$) and the full sample size ($N$).
 * **Transformation:**
-    $\text{CI}_{\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times \{\text{Limit}_{\text{sub}} - \text{PointEst}\}$
+    $$\text{CI}_ {\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times \{\text{Limit}_{\text{sub}} - \text{PointEst}\}$$
 * This converts the width of the interval from the subsample scale to the proper $\sqrt{N}$ scale required for inference on the full dataset.
 
 #### 4. Performance Metrics Calculation
