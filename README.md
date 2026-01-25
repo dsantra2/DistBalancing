@@ -143,7 +143,7 @@ The data set is taken from the R package _DoubleML_ and can be used to estimate 
 * **Estimand:** Our estimand is **the local average treatment effect (LATE)**[^4][^5], the treatment effect among compliers, defined and identified as:
 
 $$
-\tau_{\text{LATE}}^{*} = E\{ Y _i(A_i=1) - Y _ i ( A _ i=0 ) \mid A _ i ( Z _ i=1) > A_ i(Z _i=0) \} = \frac{E\{(2Z_i-1)Y_i/\Pr(Z_i|X_i)\}}{E\{(2Z_i-1)A_i/\Pr(Z_i|X_i)\}}
+\tau_{\text{LATE}}^{*} = E{ Y _i(A_i=1) - Y _ i ( A _ i=0 ) \mid A _ i ( Z _ i=1) > A_ i(Z _i=0) } = \frac{E\{(2Z_i-1)Y_i/\Pr(Z_i|X_i)\}}{E\{(2Z_i-1)A_i/\Pr(Z_i|X_i)\}}
 $$
 
 * **Covariates (X)**
