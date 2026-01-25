@@ -1,5 +1,5 @@
 # Replication Files for "Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance"
-This supplementary file contains replication codes for "Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance" [Santra, Chen, Park, 2026](https://doi.org/10.48550/arXiv.2601.15449).
+This supplementary file contains replication codes for "Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance" [Santra, Chen, Park, 2026](https://doi.org/10.48550/arXiv.2601.15449)[^1].
 ## Software and Packages
 * Software: R version 4.4.3
 * Packages: _optiSolve_ (version 1.0); _WeightIt_ (version 1.4.0); _DoubleML_ (version 1.0.2); _mlr3_ (version 1.0.1); _mlr3learners_ (version 0.12.0); _data.table_ (version 1.17.0); _ggplot2_ (version 3.5.2); _purrr_ (version 1.0.4); _dplyr_ (version 1.1.4); _tidyr_ (version 1.3.1)
@@ -30,7 +30,7 @@ For the simulations, we have considered:
   * LATE: $E[Y(Z=1) - Y(Z=0) \mid A(Z=1) > A(Z=0)]$
 * **Kernels:** Gaussian, Laplacian, TCFD, Mat\'ern and Energy.
 
-The bandwidth parameters of Gaussian and Laplacian were chosen from the median heuristics [Garreau, D., Jitkrittum, W., & Kanagawa, M. (2018)](https://arxiv.org/abs/1707.07269). In addition, for TCFD, the kernel is approximated by using i.i.d. $V_1, \dots, V_T$ drawn from a $t(5)$ distribution using the following equation with $T=10^4$:
+The bandwidth parameters of Gaussian and Laplacian were chosen from the median heuristics [Garreau, D., Jitkrittum, W., & Kanagawa, M. (2018)](https://arxiv.org/abs/1707.07269)[^3]. In addition, for TCFD, the kernel is approximated by using i.i.d. $V_1, \dots, V_T$ drawn from a $t(5)$ distribution using the following equation with $T=10^4$:
 
 $$
 \tilde{k}(X_i, X_j) \simeq \frac{1}{T} \sum_{t=1}^T \cos \{ V_t'(X_i - X_j) \}
@@ -58,7 +58,7 @@ Functions to compute the Gram matrix for various kernels.
 * **`K.T.CFD(Xmat, bandwidth)`**: Implements the **TCFD Kernel** approximation. It approximates the kernel by projecting data with random weights drawn from a t-distribution ($df=5$) and computing the cosine distance.
 * **`Ker(Xmat, name, ...)`**: The main wrapper for kernel calculations.
     * **Logic:** Computes distance matrices (Euclidean or Manhattan) and applies the kernel formula (e.g., Gaussian $\exp(-D^2/\gamma^2)$).
-    * **Bandwidth Selection:** Uses the **median heuristic** (median of pairwise distances) if no bandwidth is provided.
+    * **Bandwidth Selection:** Uses the **median heuristic** (median of pairwise distances)[^3] if no bandwidth is provided.
 
 #### 3. Data Generation
 * **`DGP(DGP.type, N, p)`**: Generates synthetic datasets ($X, Z, A, Y$).
@@ -134,13 +134,13 @@ Six summary dataframes are created:
 # DataAnalysis Folder
 The DataAnalysis folder contains replication files for the real-data analysis in Section 7 of the main paper. 
 ## Description
-The data set is taken from the R package _DoubleML_ and can be used to estimate the effect of 401(k) eligibility and participation on accumulated assets [DoubleML2022Python](http://jmlr.org/papers/v23/21-0862.html).In this data,
+The data set is taken from the R package _DoubleML_ and can be used to estimate the effect of 401(k) eligibility and participation on accumulated assets [DoubleML2022Python](http://jmlr.org/papers/v23/21-0862.html)[^2].In this data,
 
 * **Number of observations (N)** = 9915
 * **The outcome variable (Y)** = Net financial assets (`net_tfa` ∈ [-502302, 1536798]), numeric
 * **Treatment (A)** = Participation to 401k (`p401` ∈ {0,1})
 * **Instrumental variable (Z)** = Eligibility for 401k plan (`e401` ∈ {0,1}) [3682 are eligible]
-* **Estimand:** Our estimand is **the local average treatment effect (LATE)**[^1][^2], the treatment effect among compliers, defined and identified as:
+* **Estimand:** Our estimand is **the local average treatment effect (LATE)**[^4][^5], the treatment effect among compliers, defined and identified as:
 
 $$
 \tau_{\text{LATE}}^{*} = E\{Y_i(A_i=1) - Y_i(A_i=0) \mid A_i(Z_i=1)> A_i(Z_i=0)\} = \frac{E\{(2Z_i-1)Y_i/\Pr(Z_i|X_i)\}}{E\{(2Z_i-1)A_i/\Pr(Z_i|X_i)\}}
@@ -161,12 +161,12 @@ $$
 * **Sub-sample size:** 20 different values from $[\sqrt{N}, 3\sqrt{N}]$.
     * $m \in$ { 100, 110, 121, 131, 142, 152, 162, 173, 183, 194, 204, 215, 225, 236, 246, 257, 267, 278, 288, 299 }.
 * **Repetition:** For each $m$, inference method, and kernel/method, number of estimands calculated = 500.
-* **Optimal sub-sample size:** Chosen among the 20 sub-sample sizes based on volatility scores[^3].
+* **Optimal sub-sample size:** Chosen among the 20 sub-sample sizes based on volatility scores[^6].
 
 #### Methods
 
 * **Distribution balancing:** Gaussian, Laplacian, Matern, Energy, and TCFD kernels are used to construct the gram matrix.
-    * The bandwidth parameters of Gaussian, Laplacian, and Matern were chosen from the median heuristics[^4].
+    * The bandwidth parameters of Gaussian, Laplacian, and Matern were chosen from the median heuristics[^3].
     * For TCFD, the kernel is approximated by using i.i.d. $V_1, \ldots, V_T$ drawn from a $t(5)/\sigma$ distribution using the following equation with $T=10^4$:
     
     $$
@@ -175,11 +175,11 @@ $$
     
     where $\sigma =$ median[Laplacian kernel].
 
-* **Covariate balancing propensity score (CBPS):** The propensity scores are calculated using the `WeightIt` package, and the weights are calculated as the inverse propensity score. This method was proposed in Imai (2014)[^5]. R package descriptions are given in Greifer (2020)[^6].
+* **Covariate balancing propensity score (CBPS):** The propensity scores are calculated using the `WeightIt` package, and the weights are calculated as the inverse propensity score. This method was proposed in Imai (2014)[^8]. R package descriptions are given in Greifer (2020)[^9].
 
 * **Inverse probability weighting (IPW):** The propensity scores are calculated using the logistic regression model with no interaction terms, and the weights are calculated as the inverse propensity score.
 
-* **Double debiased machine learning (DDML):** See Chernozhukov (2018)[^7].
+* **Double debiased machine learning (DDML):** See Chernozhukov (2018)[^10].
 ## Codes
 The functions used in the following R files are similar to the previous section (simulation).
 * **weights_Final.R** calculates the optimal weights for different kernels.
@@ -187,13 +187,12 @@ The functions used in the following R files are similar to the previous section 
 * **401k_Report.R** generates the summary table using the combined result from _401k_Final_ and weights from _weights_Final.R_.
 
 ## References
-* Santra, Chen, Park (2026). **Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance**, arXiv [link](https://doi.org/10.48550/arXiv.2601.15449).
-* Bach, P., Chernozhukov, V., Kurz, M. S., & Spindler, M. (2022). **DoubleML – An object-oriented implementation of double machine learning in Python**. Journal of Machine Learning Research, 23 (53), 1–6. [link](http://jmlr.org/papers/v23/21-0862.html).
-* Garreau, D., Jitkrittum, W., & Kanagawa, M. (2018). **Large sample analysis of the median heuristic**. [link](https://arxiv.org/abs/1707.07269).
-[^1]: Angrist, J. D., & Imbens, G. W. (1995). *Identification and Estimation of Local Average Treatment Effects*.
-[^2]: Angrist, J. D., Imbens, G. W., & Rubin, D. B. (1996). *Identification of Causal Effects Using Instrumental Variables*.
-[^3]: Politis, D. N., Romano, J. P., & Wolf, M. (1999). *Subsampling*.
-[^4]: Garreau, D., Jitkrittum, W., & Kanagawa, M. (2018). *Large Sample Analysis of the Median Heuristic*.
-[^5]: Imai, K., & Ratkovic, M. (2014). *Covariate Balancing Propensity Score*.
-[^6]: Greifer, N. (2020). *WeightIt: Weighting for Covariate Balance in Observational Studies*.
-[^7]: Chernozhukov, V., et al. (2018). *Double/Debiased Machine Learning for Treatment and Structural Parameters*.
+[^1]: Santra, Chen, Park (2026). **Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance**, arXiv [link](https://doi.org/10.48550/arXiv.2601.15449).
+[^2]: Bach, P., Chernozhukov, V., Kurz, M. S., & Spindler, M. (2022). **DoubleML – An object-oriented implementation of double machine learning in Python**. Journal of Machine Learning Research, 23 (53), 1–6. [link](http://jmlr.org/papers/v23/21-0862.html).
+[^3]: Garreau, D., Jitkrittum, W., & Kanagawa, M. (2018). **Large sample analysis of the median heuristic**. [link](https://arxiv.org/abs/1707.07269).
+[^4]: Angrist, J., & Imbens, G. (1995). **Identification and estimation of local average treatment effects**. _National Bureau of Economic Research Cambridge_, Mass., USA.
+[^5]: Angrist, J. D., Imbens, G. W., & Rubin, D. B. (1996). **Identification of causal effects using instrumental variables**. _Journal of the American Statistical Association_, 91 (434), 444–455.
+[^6]: Politis, D. N., Romano, J. P., & Wolf, M. (1999). **Subsampling**. _Springer New York_. [link](https://books.google.com/books?id=nGu6rqjE6JoC)
+[^8]: Imai, K., & Ratkovic, M. (2014). **Covariate balancing propensity score**. _Journal of the Royal Statistical Society Series B: Statistical Methodology_, 76 (1), 243–263.
+[^9]: Greifer, N. (2020). **WeightIt: Weighting for Covariate Balance in Observational Studies**.[link](https://ngreifer.github.io/WeightIt/).
+[^10]: Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). **Double/debiased machine learning for treatment and structural parameters**. _Oxford University Press_ Oxford, UK.
