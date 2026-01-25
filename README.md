@@ -170,7 +170,7 @@ $$
     * For TCFD, the kernel is approximated by using i.i.d. $V_1, \ldots, V_T$ drawn from a $t(5)/\sigma$ distribution using the following equation with $T=10^4$:
     
     $$
-    \tilde{k}(X _i,X _j) \simeq \frac{1}{T}\sum _{t=1}^T \cos \{ V_t'(X_i-X_j) \}
+    \tilde{k}(X _ i,X _ j) \simeq \frac{1}{T}\sum _ {t=1}^T \cos \{ V_ t'(X_ i-X_ j) \}
     $$
     
     where $\sigma =$ median[Laplacian kernel].
