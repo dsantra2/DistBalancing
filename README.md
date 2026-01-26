@@ -114,14 +114,14 @@ The script ensures data integrity before analysis:
 #### 3. Confidence Interval Rescaling (Subsampling)
 Confidence intervals from subsampling must be rescaled to account for the difference between the subsample size ($m$) and the full sample size ($N$).
 * **Transformation:**
-    $$\text{CI}_ {\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times \{\text{Limit}_{\text{sub}} - \text{PointEst}\}$$
+    $$\text{CI}_ {\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times \Big(\text{Limit}_{\text{sub}} - \text{PointEst}\Big)$$
 * This converts the width of the interval from the subsample scale to the proper $\sqrt{N}$ scale required for inference on the full dataset.
 
 #### 4. Performance Metrics Calculation
 The script aggregates results by `kernel`, `N`, and `Inference` type to calculate the following metrics for the **Numerator**, **Denominator**, and **LATE** separately for each DGP type:
 
-* **Bias:** Scaled bias ($100 \times \text{mean}(\hat{\theta} - \theta_{\text{true}})$).
-* **SE (Standard Error):** Scaled standard deviation of the estimates ($100 \times \text{SD}(\hat{\theta})$).
+* **Bias:** Scaled bias $(100 \times \text{mean} ( \hat{\theta} - \theta_ {\text{true} } ))$.
+* **SE (Standard Error):** Scaled standard deviation of the estimates $(100 \times \text{SD}(\hat{\theta}))$.
 * **MSE (Mean Squared Error):** $\text{Bias}^2 + \text{SE}^2$.
 * **Coverage:** The proportion of simulations where the True value falls within the calculated Confidence Interval.
 * **Length:** The average width of the Confidence Interval.
