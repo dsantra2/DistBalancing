@@ -30,20 +30,20 @@ table(data$p401,data$e401)
 
 
 
-results <- read.csv("Result_401k_combined.csv",header = TRUE)
+results <- read.csv("Result_401k_combined_500.csv",header = TRUE)
 
-results=results%>%
-  filter(denom<=1 & denom>=-1)
-
-freq <- table(results$SEED)
-results <- results[results$SEED %in% names(freq[freq == 86]), ]
-
-top500_seeds=results %>%
-  count(SEED, sort = TRUE) %>%   
-  slice_head(n = 500)
-
-results <- results %>%
-  filter(SEED %in% top500_seeds$SEED)
+# results=results%>%
+#   filter(denom<=1 & denom>=-1)
+# 
+# freq <- table(results$SEED)
+# results <- results[results$SEED %in% names(freq[freq == 107]), ]
+# 
+# top500_seeds=results %>%
+#   count(SEED, sort = TRUE) %>%
+#   slice_head(n = 500)
+# 
+# results <- results %>%
+#   filter(SEED %in% top500_seeds$SEED)
 
 
 
