@@ -1,5 +1,5 @@
 # Replication Files for "Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance"
-This supplementary file contains replication codes for "Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance" [^1].
+This supplementary file contains replication codes for "Distributional Balancing for Causal Inference: A Unified Framework via Characteristic Function Distance".
 ## Software and Packages
 * Software: R version 4.4.3
 * Packages: _optiSolve_ (version 1.0); _WeightIt_ (version 1.4.0); _DoubleML_ (version 1.0.2); _mlr3_ (version 1.0.1); _mlr3learners_ (version 0.12.0); _data.table_ (version 1.17.0); _ggplot2_ (version 3.5.2); _purrr_ (version 1.0.4); _dplyr_ (version 1.1.4); _tidyr_ (version 1.3.1)
@@ -180,6 +180,7 @@ $$
 The functions used in the following R files are similar to the previous section (Simulation).
 * **weights_Final.R** calculates the optimal weights for different kernels.
 * **401k_Final.R** generates a single row as output and produce a csv file with a name structure: "_Result_401k_%s_N%05d_%s_SEED%05d.csv_".
+* **Result_401k_combined_500.csv** is the combined output.
 * **401k_Report.R** generates the summary table using the combined result from _401k_Final_ and weights from _weights_Final.R_.
 
 ## References
