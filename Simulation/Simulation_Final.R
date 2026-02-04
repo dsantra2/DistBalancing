@@ -48,8 +48,6 @@ K.T.CFD <- function(Xmat,bandwidth){
   return(K)
 }
 
-expit <- function(v){exp(v)/(1+exp(v))}
-
 Ker <- function(Xmat, name, c=1, beta=0.5, nu=2.5, l=1, bandwidth=NULL) {
   D <- as.matrix(dist(Xmat))
   if (is.null(bandwidth)) {
@@ -141,12 +139,14 @@ DGP <- function(DGP.type=1, N, p=10) {
   return(out)
 }
 
-distbalance <- function(treatment, covariate, name, bandwidth, lambda){ 
+distbalance <- function(treatment, covariate, name, bandwidth, lambda, K=NULL){ 
   N=nrow(covariate)
   Z=treatment
   X=covariate
   
-  K <- Ker(X, name, bandwidth = bandwidth)$K 
+  if(is.null(K)){
+    K <- Ker(X, name, bandwidth = bandwidth)$K 
+  }
   
   i1 <- as.numeric(Z == 1)
   i0 <- as.numeric(Z == 0)
@@ -180,7 +180,7 @@ distbalance <- function(treatment, covariate, name, bandwidth, lambda){
   return(weights)
 }
 
-sim <- function(DGP.type=1, N, p=10, name, seed=1, return_K=FALSE, bandwidth=NULL) {
+sim <- function(DGP.type=1, N, p=10, name, seed=1, return_K=FALSE, bandwidth=NULL, K=NULL) {
   set.seed(seed)
   lambda <- 1 / (N^2)
   data_gen=DGP(DGP.type,N,p) 
@@ -189,15 +189,18 @@ sim <- function(DGP.type=1, N, p=10, name, seed=1, return_K=FALSE, bandwidth=NUL
   Y=data_gen$Y
   Z=data_gen$Z
   
-  K <- NULL
-  bw <- NULL
-  
   if(name%in%c("Gaussian","Laplacian","Energy","TCFD","Matern")){
     # Compute kernel
-    K <- Ker(X, name, bandwidth = bandwidth)$K
-    bw=Ker(X, name, bandwidth = bandwidth)$bandwidth
+    if(is.null(K)){
+      K <- Ker(X, name, bandwidth = bandwidth)$K 
+    }
+    if(is.null(bandwidth)){
+      bw <- Ker(X, name, bandwidth = bandwidth)$bandwidth
+    } else {
+      bw <- bandwidth
+    }
     
-    weight <- distbalance(Z, X, name=name, bandwidth = bw, lambda = lambda)
+    weight <- distbalance(Z, X, name=name, bandwidth = bw, lambda = lambda, K=K)
     
     i1 <- as.numeric(Z == 1)
     i0 <- as.numeric(Z == 0)
@@ -234,7 +237,7 @@ sim <- function(DGP.type=1, N, p=10, name, seed=1, return_K=FALSE, bandwidth=NUL
 # Subsampling ######################
 
 choose_best_m_ss <- function(X, A, Y, Z, name, lambda, 
-                             bandwidth=NULL, reps=500, VI_bw=2) {
+                             bandwidth=NULL, reps=500, VI_bw=2, K=NULL) {
   N <- length(Z)
   range.ss <- c(sqrt(N), 3 * sqrt(N))
   grid.ss <- unique(round(seq(range.ss[1], range.ss[2], length = 20)))
@@ -255,7 +258,7 @@ choose_best_m_ss <- function(X, A, Y, Z, name, lambda,
       
       # Subsampling is only used for Kernel methods in this logic
       weight <- tryCatch(
-        distbalance(Z[idx], X[idx,,drop=FALSE], name=name, bandwidth=bandwidth, lambda=lambda),
+        distbalance(Z[idx], X[idx,,drop=FALSE], name=name, bandwidth=bandwidth, lambda=lambda, K=K[idx,idx]),
         error = function(e) rep(NA, m)
       )
       if (any(is.na(weight))) next
@@ -309,7 +312,7 @@ choose_best_m_ss <- function(X, A, Y, Z, name, lambda,
 
 # Bootstrap ################################
 
-run_boot <- function(X, A, Y, Z, name, lambda=NULL, reps=500, bandwidth=NULL) {
+run_boot <- function(X, A, Y, Z, name, lambda=NULL, reps=500, bandwidth=NULL, K=NULL) {
   N <- length(Z)
   num_vec <- numeric(reps)
   denom_vec <- numeric(reps)
@@ -328,7 +331,7 @@ run_boot <- function(X, A, Y, Z, name, lambda=NULL, reps=500, bandwidth=NULL) {
     
     if (is_kernel) {
       weight <- tryCatch(
-        distbalance(Z_b, X_b, name=name, bandwidth=bandwidth, lambda=lambda),
+        distbalance(Z_b, X_b, name=name, bandwidth=bandwidth, lambda=lambda, K=K[idx,idx]),
         error = function(e) rep(NA, N)
       )
       if (any(is.na(weight))) next
@@ -408,7 +411,8 @@ run_all <- function(DGP.type,kernel,inference) {
   if (inference == "Boot") {
     boot_CI <- run_boot(
       X = sim_res$X, A = sim_res$A, Y = sim_res$Y, Z = sim_res$Z,
-      name = kernel, lambda = sim_res$lambda, reps=500, bandwidth=sim_res$bandwidth
+      name = kernel, lambda = sim_res$lambda, reps=500, bandwidth=sim_res$bandwidth,
+      K=sim_res$K
     )
     CI.num   <- boot_CI$num_CI
     CI.denom <- boot_CI$denom_CI
@@ -422,7 +426,8 @@ run_all <- function(DGP.type,kernel,inference) {
     # Subsampling only for kernels
     ss_res <- choose_best_m_ss(
       X = sim_res$X, A = sim_res$A, Y = sim_res$Y, Z = sim_res$Z,
-      name = kernel, lambda = sim_res$lambda, reps=500, VI_bw=2, bandwidth=sim_res$bandwidth
+      name = kernel, lambda = sim_res$lambda, reps=500, VI_bw=2, bandwidth=sim_res$bandwidth,
+      K=sim_res$K
     )
     CI.num   <- ss_res$num_CI
     CI.denom <- ss_res$denom_CI
@@ -462,3 +467,4 @@ write.csv(RESULT,
           file = sprintf("Result_optiSolve_%s_DGP%0.5d_N%0.5d_%s_SEED%0.5d.csv",
                          kernel, DGP.type, N,inference, SEED), row.names = FALSE
 )
+
