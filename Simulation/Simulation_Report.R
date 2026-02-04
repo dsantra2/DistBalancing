@@ -14,30 +14,6 @@ LATE_nonLinear=0.9999239
 
 results <- read.csv("Result_merge.csv",header = TRUE)
 
-mismatches <- results %>%
-  select(kernel, DGP.type, N, SEED, Inference, num, denom, late) %>%
-  pivot_wider(
-    names_from = Inference, 
-    values_from = c(num, denom, late)
-  ) %>%
-  filter(
-    abs(num_SS - num_Boot) > 1e-6 | 
-      abs(denom_SS - denom_Boot) > 1e-6 | 
-      abs(late_SS - late_Boot) > 1e-6
-  )
-results=anti_join(results, mismatches, by = c("kernel", "DGP.type", "N", "SEED"))
-
-results <- results %>% mutate(across(where(is.numeric), ~ round(.x, 7)))
-results <- unique(results)
-
-freq <- table(results$SEED)
-results <- results[results$SEED %in% names(freq[freq == 100]), ]
-
-results=results%>%
-  group_by(N,DGP.type,Inference,kernel) %>%
-  slice_head(n = 500) %>%
-  ungroup()
-
 results <- results %>%
   mutate(
     Lower.num=sqrt(m_num/N)*(Lower.num-num)+num,
@@ -124,4 +100,5 @@ late2=results %>%
     Coverage = mean(LATE_nonLinear >= Lower.late & LATE_nonLinear <= Upper.late),
     length = mean(Upper.late - Lower.late),
     .groups = "drop"
+
   )
