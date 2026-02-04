@@ -396,7 +396,9 @@ run_all <- function(DGP.type,kernel,inference) {
   
   # Run simulation for all methods to get point estimates
   # return_K is only relevant for kernels, but sim handles it gracefully now
-  sim_res <- sim(DGP.type, N, 10, kernel, seed = SEED, return_K = TRUE)
+  if(kernel%in% c("Gaussian","Laplacian","Energy","TCFD","Matern")){
+  sim_res <- sim(DGP.type, N, 10, kernel, seed = SEED, return_K = TRUE)}
+  else{sim_res <- sim(DGP.type, N, 10, kernel, seed = SEED, return_K = FALSE)}
   
   # Initialize result placeholders
   best_m_num <- NA
@@ -467,4 +469,5 @@ write.csv(RESULT,
           file = sprintf("Result_optiSolve_%s_DGP%0.5d_N%0.5d_%s_SEED%0.5d.csv",
                          kernel, DGP.type, N,inference, SEED), row.names = FALSE
 )
+
 
