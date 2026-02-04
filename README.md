@@ -105,19 +105,13 @@ Hardcoded "True" values derived from the Data Generating Process (DGP) are defin
 * **Linear DGP (Type 1):** `Denom_Linear`, `Numer_Linear`, `LATE_Linear`.
 * **Non-Linear DGP (Type 2):** `Denom_nonLinear`, `Numer_nonLinear`, `LATE_nonLinear`.
 
-#### 2. Data Cleaning & Consistency Checks
-The script ensures data integrity before analysis:
-* **Mismatch Filtering:** Checks that point estimates (`num`, `denom`, `late`) are identical for both inference methods (`SS` and `Boot`) within the same Seed/N/Kernel. If the point estimates differ by more than $10^{-6}$, those seeds are discarded.
-* **Deduplication:** Rounds values to 7 decimal places and removes duplicate rows.
-* **Trimming:** Retains the first 500 valid repetitions per group.
-
-#### 3. Confidence Interval Rescaling (Subsampling)
+#### 2. Confidence Interval Rescaling (Subsampling)
 Confidence intervals from subsampling must be rescaled to account for the difference between the subsample size ($m$) and the full sample size ($N$).
 * **Transformation:**
     $$\text{CI}_ {\text{scaled}} = \text{PointEst} \pm \sqrt{\frac{m}{N}} \times \Big(\text{Limit}_{\text{sub}} - \text{PointEst}\Big)$$
 * This converts the width of the interval from the subsample scale to the proper $\sqrt{N}$ scale required for inference on the full dataset.
 
-#### 4. Performance Metrics Calculation
+#### 3. Performance Metrics Calculation
 The script aggregates results by `kernel`, `N`, and `Inference` type to calculate the following metrics for the **Numerator**, **Denominator**, and **LATE** separately for each DGP type:
 
 * **Bias:** Scaled bias $(100 \times \text{mean} ( \hat{\theta} - \theta_ {\text{true} } ))$.
@@ -126,7 +120,7 @@ The script aggregates results by `kernel`, `N`, and `Inference` type to calculat
 * **Coverage:** The proportion of simulations where the True value falls within the calculated Confidence Interval.
 * **Length:** The average width of the Confidence Interval.
 
-#### 5. Output Dataframes
+#### 4. Output Dataframes
 Six summary dataframes are created:
 * **DGP 1 (Linear):** `num1`, `denom1`, `late1`
 * **DGP 2 (Non-Linear):** `num2`, `denom2`, `late2`
