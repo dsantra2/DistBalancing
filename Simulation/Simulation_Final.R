@@ -182,7 +182,7 @@ distbalance <- function(treatment, covariate, name, bandwidth, lambda, K=NULL){
 
 sim <- function(DGP.type=1, N, p=10, name, seed=1, return_K=FALSE, bandwidth=NULL, K=NULL) {
   set.seed(seed)
-  lambda <- 1 / (N^2)
+  lambda <- 1 / (N)
   data_gen=DGP(DGP.type,N,p) 
   X=data_gen$X
   A=data_gen$A
